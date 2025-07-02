@@ -59,6 +59,7 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      margin: 1rem;
     }
     button:hover {
       background-color: #66bb6a;
@@ -67,6 +68,12 @@
       margin-top: 1.5rem;
       font-size: 1.5rem;
       font-weight: bold;
+    }
+    .nav-button {
+      background-color: #0288d1;
+    }
+    .nav-button:hover {
+      background-color: #03a9f4;
     }
   </style>
 </head>
@@ -77,7 +84,7 @@
   <button onclick="spinWheel()">Spin</button>
   <div id="spinDisplay">Spinning...</div>
   <div id="result"></div>
-  <a href="index.html">Back to Home</a>
+  <button class="nav-button" onclick="window.location.href='index.html'">Back to Home</button>
 
   <script>
     let degrees = 0;
