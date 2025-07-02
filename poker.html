@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Poker - Coming Soon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Poker vs AI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,18 +11,64 @@
       color: #fff;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      padding: 40px 0;
     }
+
     h1 {
       font-size: 3rem;
       margin-bottom: 1rem;
     }
-    p {
-      font-size: 1.25rem;
+
+    .zone {
+      margin: 1rem 0;
+      text-align: center;
     }
+
+    .cards {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    .card {
+      width: 60px;
+      height: 90px;
+      border-radius: 6px;
+      border: 1px solid #fff;
+      background-color: #2e7d32;
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 4px;
+      font-size: 1.2rem;
+      position: relative;
+    }
+
+    .♥, .♦ { color: #d32f2f; }
+    .♠, .♣ { color: #000; }
+
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #90caf9;
+      border: none;
+      border-radius: 5px;
+      color: #000;
+    }
+
+    #result {
+      font-size: 1.5rem;
+      margin-top: 1rem;
+      display: block;
+    }
+
     a {
       margin-top: 2rem;
       color: #90caf9;
@@ -31,8 +77,204 @@
   </style>
 </head>
 <body>
-  <h1>Poker</h1>
-  <p>This game is under development. Stay tuned!</p>
-  <a href="index.html">Back to Home</a>
+
+  <h1>Poker: You vs AI</h1>
+
+  <div class="zone">
+    <strong>Your Hand</strong>
+    <div id="player-hand" class="cards"></div>
+  </div>
+
+  <div class="zone">
+    <strong>Community Cards</strong>
+    <div id="community-cards" class="cards"></div>
+  </div>
+
+  <div class="zone">
+    <strong>AI’s Hand</strong>
+    <div id="ai-hand" class="cards"></div>
+  </div>
+
+  <button onclick="deal()">Deal!</button>
+  <span id="result"></span>
+  <a href="index.html">⬅ Back to Home</a>
+
+  <script>
+    const suits = ['♠','♥','♦','♣'];
+    const ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+
+    function createDeck() {
+      const deck = [];
+      suits.forEach(s => ranks.forEach(r => deck.push({ r, s })));
+      return deck;
+    }
+
+    function shuffle(deck) {
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+
+    function renderCards(containerId, cards) {
+      const cont = document.getElementById(containerId);
+      cont.innerHTML = '';
+      cards.forEach(({ r, s }) => {
+        const div = document.createElement('div');
+        div.className = 'card ' + s;
+        div.textContent = r + s;
+        cont.appendChild(div);
+      });
+    }
+
+    function rankValue(r) {
+      if (r === 'J') return 11;
+      if (r === 'Q') return 12;
+      if (r === 'K') return 13;
+      if (r === 'A') return 14;
+      return parseInt(r);
+    }
+
+    function isSequential(arr) {
+      for (let i = 1; i < arr.length; i++) {
+        if (arr[i] - arr[i - 1] !== 1) return false;
+      }
+      return true;
+    }
+
+    function getHandValue(cards) {
+      // Count ranks and suits
+      const counts = {};
+      const suitsCnt = {};
+      cards.forEach(c => {
+        counts[c.r] = (counts[c.r] || 0) + 1;
+        suitsCnt[c.s] = (suitsCnt[c.s] || 0) + 1;
+      });
+
+      // Prepare rank list for straight detection
+      let vals = [...new Set(cards.map(c => rankValue(c.r)))].sort((a, b) => a - b);
+      // Ace-low straight
+      if (vals.includes(14)) vals = [1, ...vals];
+
+      // Find best straight
+      let straightMax = 0;
+      for (let i = 0; i <= vals.length - 5; i++) {
+        const slice = vals.slice(i, i + 5);
+        if (isSequential(slice)) straightMax = Math.max(straightMax, slice[4]);
+      }
+
+      // Find flush suit (if any)
+      const flushSuit = Object.entries(suitsCnt)
+        .find(([s, cnt]) => cnt >= 5)?.[0];
+      let flushVals = [];
+      if (flushSuit) {
+        flushVals = cards
+          .filter(c => c.s === flushSuit)
+          .map(c => rankValue(c.r))
+          .sort((a, b) => b - a)
+          .slice(0, 5);
+      }
+
+      // Check straight flush
+      let sfMax = 0;
+      if (flushSuit) {
+        const fv = [...new Set(
+          cards.filter(c => c.s === flushSuit).map(c => rankValue(c.r))
+        )].sort((a, b) => a - b);
+        if (fv.includes(14)) fv.unshift(1);
+        for (let i = 0; i <= fv.length - 5; i++) {
+          const sl = fv.slice(i, i + 5);
+          if (isSequential(sl)) sfMax = Math.max(sfMax, sl[4]);
+        }
+      }
+
+      // Build counts array
+      const countVals = Object.values(counts).sort((a, b) => b - a);
+
+      // Determine category
+      // 8=straight-flush,7=four,6=full-house,5=flush,
+      // 4=straight,3=three,2=two-pair,1=pair,0=high
+      let category = 0;
+      if (sfMax)            category = 8;
+      else if (countVals[0] === 4)    category = 7;
+      else if (countVals[0] === 3 && countVals[1] >= 2) category = 6;
+      else if (flushSuit)   category = 5;
+      else if (straightMax) category = 4;
+      else if (countVals[0] === 3)    category = 3;
+      else if (countVals[0] === 2 && countVals[1] === 2) category = 2;
+      else if (countVals[0] === 2)    category = 1;
+
+      // Tie-breaker array
+      let tiebreak = [];
+      if (category === 8) {
+        tiebreak = [sfMax];
+      } else if (category === 7) {
+        // four-of-kind rank, then highest other
+        const four = +Object.entries(counts).find(([,c]) => c === 4)[0];
+        const kicker = ranks
+          .map(r => rankValue(r))
+          .filter(v => v !== four)
+          .concat(cards.map(c=>rankValue(c.r)))
+          .sort((a,b)=>b-a)[0];
+        tiebreak = [four, kicker];
+      } else if (category === 6) {
+        // triple rank, then pair rank
+        const three = +Object.entries(counts).find(([,c]) => c === 3)[0];
+        const pair  = +Object.entries(counts)
+          .filter(([,c]) => c >= 2 && +_ !== three)
+          .map(([r])=>rankValue(r))
+          .sort((a,b)=>b-a)[0];
+        tiebreak = [three, pair];
+      } else if (category === 5) {
+        tiebreak = flushVals;
+      } else if (category === 4) {
+        tiebreak = [straightMax];
+      } else {
+        // high-card and lower categories: sort by count then rank
+        const items = Object.entries(counts)
+          .map(([r,c])=>({r:rankValue(r),c}))
+          .sort((a,b)=>b.c - a.c || b.r - a.r);
+        items.forEach(it => {
+          for (let i = 0; i < it.c; i++) tiebreak.push(it.r);
+        });
+      }
+
+      return { category, tiebreak };
+    }
+
+    function compareHands(a, b) {
+      if (a.category !== b.category)
+        return a.category > b.category ? 1 : -1;
+      for (let i = 0; i < a.tiebreak.length; i++) {
+        if (a.tiebreak[i] !== b.tiebreak[i])
+          return a.tiebreak[i] > b.tiebreak[i] ? 1 : -1;
+      }
+      return 0;
+    }
+
+    function deal() {
+      const deck = createDeck();
+      shuffle(deck);
+
+      const player    = [deck.pop(), deck.pop()];
+      const ai        = [deck.pop(), deck.pop()];
+      const community = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+
+      renderCards('player-hand', player);
+      renderCards('ai-hand',     ai);
+      renderCards('community-cards', community);
+
+      const pVal = getHandValue([...player, ...community]);
+      const aVal = getHandValue([...ai, ...community]);
+      const cmp  = compareHands(pVal, aVal);
+
+      let msg;
+      if (cmp > 0)      msg = "🎉 You win!";
+      else if (cmp < 0) msg = "💻 AI wins!";
+      else              msg = "🤝 It's a tie!";
+
+      document.getElementById('result').textContent = msg;
+    }
+  </script>
 </body>
 </html>
