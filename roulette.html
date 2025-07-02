@@ -75,11 +75,10 @@
     .nav-button:hover {
       background-color: #03a9f4;
     }
-    input[type="number"] {
+    input, select {
       padding: 0.5rem;
       font-size: 1rem;
-      width: 100px;
-      margin: 1rem;
+      margin: 0.5rem;
       border-radius: 5px;
       border: none;
     }
@@ -93,6 +92,13 @@
   <div>
     <label for="betAmount">Bet Amount: $</label>
     <input type="number" id="betAmount" min="1" value="10">
+    <label for="betType">Bet On:</label>
+    <select id="betType">
+      <option value="colorRed">Red</option>
+      <option value="colorBlack">Black</option>
+      <option value="number">Number</option>
+    </select>
+    <input type="number" id="betNumber" min="0" max="36" placeholder="Pick a number">
   </div>
 
   <button onclick="spinWheel()">Spin</button>
@@ -104,6 +110,8 @@
   <script>
     let degrees = 0;
     const numbers = ["0", "26", "3", "35", "12", "28", "7", "29", "18", "22", "9", "31", "14", "20", "1", "33", "16", "24", "5", "10", "23", "8", "30", "11", "36", "13", "27", "6", "34", "17", "25", "2", "21", "4", "19", "15", "32"];
+    const redNumbers = ["1","3","5","7","9","12","14","16","18","19","21","23","25","27","30","32","34","36"];
+    const blackNumbers = ["2","4","6","8","10","11","13","15","17","20","22","24","26","28","29","31","33","35"];
 
     function spinWheel() {
       const wheel = document.getElementById('wheel');
@@ -115,6 +123,9 @@
       const resultDisplay = document.getElementById('result');
       const betResult = document.getElementById('betResult');
       const betAmount = parseFloat(document.getElementById('betAmount').value);
+      const betType = document.getElementById('betType').value;
+      const betNumber = document.getElementById('betNumber').value;
+
       resultDisplay.textContent = "";
       betResult.textContent = "";
 
@@ -129,12 +140,21 @@
         const normalizedDeg = (spin % 360);
         const index = Math.floor((normalizedDeg / 360) * numbers.length);
         const winningNumber = numbers[numbers.length - 1 - index];
+
         spinDisplay.textContent = "Spin complete!";
         resultDisplay.textContent = `Result: ${winningNumber}`;
 
-        // Simple example: player wins double if hits even number except 0
-        if (parseInt(winningNumber) > 0 && parseInt(winningNumber) % 2 === 0) {
-          betResult.textContent = `You won $${betAmount * 2}!`;
+        // Determine if the player wins
+        if (betType === "number") {
+          if (betNumber === winningNumber) {
+            betResult.textContent = `You won $${betAmount * 36}! (Exact match)`;
+          } else {
+            betResult.textContent = `You lost $${betAmount}. Try again!`;
+          }
+        } else if (betType === "colorRed" && redNumbers.includes(winningNumber)) {
+          betResult.textContent = `You won $${betAmount * 2}! (Red)`;
+        } else if (betType === "colorBlack" && blackNumbers.includes(winningNumber)) {
+          betResult.textContent = `You won $${betAmount * 2}! (Black)`;
         } else {
           betResult.textContent = `You lost $${betAmount}. Try again!`;
         }
