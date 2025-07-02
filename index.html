@@ -76,7 +76,7 @@
     function getCardValue(card) {
       if (card.value === 'A') return 11;
       if (['K', 'Q', 'J'].includes(card.value)) return 10;
-      return parseInt(card.value);
+      return Number(card.value); // safe fallback for '2'-'10'
     }
 
     function calculateTotal(hand) {
@@ -94,7 +94,8 @@
     }
 
     function getCardImageUrl(card) {
-      return `https://deckofcardsapi.com/static/img/${card.value}${card.suit}.png`;
+      let value = card.value === '10' ? '0' : card.value;
+      return `https://deckofcardsapi.com/static/img/${value}${card.suit}.png`;
     }
 
     function displayCards(hand, containerId) {
@@ -164,4 +165,3 @@
   </script>
 </body>
 </html>
-
