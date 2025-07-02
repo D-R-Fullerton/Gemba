@@ -50,11 +50,28 @@
       margin: 1rem 0;
       font-size: 1.2rem;
     }
+    .bet-input {
+      margin: 1rem 0;
+    }
+    input[type="number"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 100px;
+      text-align: center;
+      border-radius: 5px;
+      border: none;
+    }
   </style>
 </head>
 <body>
   <h1>♠ Blackjack</h1>
   <p class="money-status">Money: $<span id="money">200</span></p>
+
+  <div class="bet-input">
+    <label for="betAmount">Bet Amount: $</label>
+    <input type="number" id="betAmount" value="10" min="1" />
+  </div>
+
   <div><strong>Your Hand (<span id="player-score">0</span>):</strong></div>
   <div id="player-hand" class="hand"></div>
 
@@ -62,7 +79,7 @@
   <div id="dealer-hand" class="hand"></div>
 
   <div class="controls">
-    <button onclick="startGame()">New Game ($10 Bet)</button>
+    <button onclick="startGame()">New Game</button>
     <button onclick="hit()">Hit</button>
     <button onclick="stand()">Stand</button>
     <br><br>
@@ -72,7 +89,7 @@
   <p id="result"></p>
 
   <script>
-    let playerHand = [], dealerHand = [], money = 200;
+    let playerHand = [], dealerHand = [], money = 200, currentBet = 10;
     const suits = ['♠', '♥', '♦', '♣'];
     const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
@@ -121,13 +138,18 @@
     }
 
     function startGame() {
-      if (money < 10) {
-        alert("You're out of money! Game over.");
+      currentBet = parseInt(document.getElementById('betAmount').value);
+      if (isNaN(currentBet) || currentBet <= 0) {
+        alert('Please enter a valid bet amount.');
+        return;
+      }
+      if (money < currentBet) {
+        alert("You're out of money or bet is too high! Game over.");
         return;
       }
       playerHand = [drawCard(), drawCard()];
       dealerHand = [drawCard()];
-      money -= 10;
+      money -= currentBet;
       document.getElementById('result').textContent = '';
       updateDisplay();
     }
@@ -151,11 +173,11 @@
       const dealerScore = calculateScore(dealerHand);
       let result;
       if (dealerScore > 21 || playerScore > dealerScore) {
-        result = 'You win! +$20';
-        money += 20;
+        result = `You win! +$${currentBet * 2}`;
+        money += currentBet * 2;
       } else if (playerScore === dealerScore) {
-        result = 'Push! You get $10 back.';
-        money += 10;
+        result = `Push! You get $${currentBet} back.`;
+        money += currentBet;
       } else {
         result = 'Dealer wins!';
       }
