@@ -3,36 +3,111 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roulette - Coming Soon</title>
+  <title>Roulette Game</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #222;
       color: #fff;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      text-align: center;
       margin: 0;
+      padding: 2rem;
     }
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
+    .wheel {
+      width: 300px;
+      height: 300px;
+      border: 10px solid #fff;
+      border-radius: 50%;
+      margin: 2rem auto;
+      position: relative;
+      background: conic-gradient(
+        red 0deg 18.46deg,
+        black 18.46deg 36.92deg,
+        red 36.92deg 55.38deg,
+        black 55.38deg 73.84deg,
+        red 73.84deg 92.30deg,
+        black 92.30deg 110.76deg,
+        red 110.76deg 129.22deg,
+        black 129.22deg 147.68deg,
+        red 147.68deg 166.14deg,
+        black 166.14deg 184.60deg,
+        red 184.60deg 203.06deg,
+        black 203.06deg 221.52deg,
+        red 221.52deg 239.98deg,
+        black 239.98deg 258.44deg,
+        red 258.44deg 276.90deg,
+        black 276.90deg 295.36deg,
+        red 295.36deg 313.82deg,
+        black 313.82deg 332.28deg,
+        green 332.28deg 360deg
+      );
+      transition: transform 4s ease-out;
     }
-    p {
-      font-size: 1.25rem;
+    .pointer {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 20px solid yellow;
+      margin: auto;
     }
-    a {
-      margin-top: 2rem;
-      color: #81d4fa;
-      text-decoration: none;
+    button {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      background-color: #43a047;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #66bb6a;
+    }
+    #result, #spinDisplay {
+      margin-top: 1.5rem;
+      font-size: 1.5rem;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <h1>Roulette</h1>
-  <p>This game is under development. Stay tuned!</p>
+  <div class="pointer"></div>
+  <div class="wheel" id="wheel"></div>
+  <button onclick="spinWheel()">Spin</button>
+  <div id="spinDisplay">Spinning...</div>
+  <div id="result"></div>
   <a href="index.html">Back to Home</a>
+
+  <script>
+    let degrees = 0;
+    const numbers = ["0", "26", "3", "35", "12", "28", "7", "29", "18", "22", "9", "31", "14", "20", "1", "33", "16", "24", "5", "10", "23", "8", "30", "11", "36", "13", "27", "6", "34", "17", "25", "2", "21", "4", "19", "15", "32"];
+
+    function spinWheel() {
+      const wheel = document.getElementById('wheel');
+      const spin = Math.floor(3600 + Math.random() * 360);
+      degrees = spin;
+      wheel.style.transform = `rotate(${spin}deg)`;
+
+      const spinDisplay = document.getElementById('spinDisplay');
+      const resultDisplay = document.getElementById('result');
+      resultDisplay.textContent = "";
+
+      let currentIndex = 0;
+      let interval = setInterval(() => {
+        spinDisplay.textContent = `Spinning... ${numbers[currentIndex]}`;
+        currentIndex = (currentIndex + 1) % numbers.length;
+      }, 100);
+
+      setTimeout(() => {
+        clearInterval(interval);
+        const normalizedDeg = (spin % 360);
+        const index = Math.floor((normalizedDeg / 360) * numbers.length);
+        const winningNumber = numbers[numbers.length - 1 - index];
+        spinDisplay.textContent = "Spin complete!";
+        resultDisplay.textContent = `Result: ${winningNumber}`;
+      }, 4000);
+    }
+  </script>
 </body>
 </html>
