@@ -75,15 +75,30 @@
     .nav-button:hover {
       background-color: #03a9f4;
     }
+    input[type="number"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 100px;
+      margin: 1rem;
+      border-radius: 5px;
+      border: none;
+    }
   </style>
 </head>
 <body>
   <h1>Roulette</h1>
   <div class="pointer"></div>
   <div class="wheel" id="wheel"></div>
+
+  <div>
+    <label for="betAmount">Bet Amount: $</label>
+    <input type="number" id="betAmount" min="1" value="10">
+  </div>
+
   <button onclick="spinWheel()">Spin</button>
   <div id="spinDisplay">Spinning...</div>
   <div id="result"></div>
+  <div id="betResult"></div>
   <button class="nav-button" onclick="window.location.href='index.html'">Back to Home</button>
 
   <script>
@@ -98,7 +113,10 @@
 
       const spinDisplay = document.getElementById('spinDisplay');
       const resultDisplay = document.getElementById('result');
+      const betResult = document.getElementById('betResult');
+      const betAmount = parseFloat(document.getElementById('betAmount').value);
       resultDisplay.textContent = "";
+      betResult.textContent = "";
 
       let currentIndex = 0;
       let interval = setInterval(() => {
@@ -113,6 +131,13 @@
         const winningNumber = numbers[numbers.length - 1 - index];
         spinDisplay.textContent = "Spin complete!";
         resultDisplay.textContent = `Result: ${winningNumber}`;
+
+        // Simple example: player wins double if hits even number except 0
+        if (parseInt(winningNumber) > 0 && parseInt(winningNumber) % 2 === 0) {
+          betResult.textContent = `You won $${betAmount * 2}!`;
+        } else {
+          betResult.textContent = `You lost $${betAmount}. Try again!`;
+        }
       }, 4000);
     }
   </script>
