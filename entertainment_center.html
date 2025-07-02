@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entertainment Center</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      text-align: center;
+    }
+    input {
+      width: 60%;
+      padding: 0.5rem;
+      margin: 1rem 0;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 0.7rem 2rem;
+      font-size: 1.1rem;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2196f3;
+    }
+    iframe, video {
+      margin-top: 2rem;
+      width: 80%;
+      height: 400px;
+      border: none;
+    }
+    .nav {
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎬 Entertainment Center 🎵</h1>
+  <p>Paste a video URL (YouTube embed link or MP4 URL):</p>
+  <input type="text" id="videoUrl" placeholder="e.g. https://www.youtube.com/embed/xyz123 or video.mp4">
+  <br>
+  <button onclick="playVideo()">Play Video</button>
+
+  <div id="videoContainer"></div>
+
+  <div class="nav">
+    <button onclick="window.location.href='index.html'">Back to Home</button>
+    <button onclick="window.location.href='blackjack.html'">Play Blackjack</button>
+    <button onclick="window.location.href='poker.html'">Play Poker</button>
+    <button onclick="window.location.href='roulette.html'">Play Roulette</button>
+  </div>
+
+  <script>
+    function playVideo() {
+      const url = document.getElementById('videoUrl').value;
+      const container = document.getElementById('videoContainer');
+      container.innerHTML = '';
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        container.innerHTML = `<iframe src="${url}" allowfullscreen></iframe>`;
+      } else {
+        container.innerHTML = `<video src="${url}" controls></video>`;
+      }
+    }
+  </script>
+</body>
+</html>
