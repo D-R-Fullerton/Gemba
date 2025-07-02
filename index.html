@@ -17,13 +17,10 @@
     }
     .card {
       display: inline-block;
-      background: #fff;
-      color: #000;
-      padding: 10px;
       margin: 5px;
-      border-radius: 5px;
-      font-weight: bold;
-      width: 40px;
+    }
+    .card img {
+      height: 80px;
     }
     button {
       padding: 10px 20px;
@@ -51,14 +48,15 @@
     <div id="dealer-cards" class="card-container"></div>
   </div>
   <div>
-    <button onclick="hit()">Hit</button>
-    <button onclick="stand()">Stand</button>
-    <button onclick="resetGame()">Reset</button>
+    <button id="hit-btn">Hit</button>
+    <button id="stand-btn">Stand</button>
+    <button id="reset-btn">Reset</button>
   </div>
   <h2 id="result"></h2>
 
   <script>
-    const suits = ['♠', '♥', '♦', '♣'];
+    const suits = ['S', 'H', 'D', 'C'];
+    const suitSymbols = { 'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣' };
     const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
     let deck = [];
@@ -95,13 +93,20 @@
       return total;
     }
 
+    function getCardImageUrl(card) {
+      return `https://deckofcardsapi.com/static/img/${card.value}${card.suit}.png`;
+    }
+
     function displayCards(hand, containerId) {
       const container = document.getElementById(containerId);
       container.innerHTML = '';
       for (let card of hand) {
         const div = document.createElement('div');
         div.className = 'card';
-        div.textContent = card.value + card.suit;
+        const img = document.createElement('img');
+        img.src = getCardImageUrl(card);
+        img.alt = `${card.value}${suitSymbols[card.suit]}`;
+        div.appendChild(img);
         container.appendChild(div);
       }
     }
@@ -137,7 +142,7 @@
       else if (dealerTotal > 21) result = 'Dealer Busts! You Win!';
       else if (playerTotal > dealerTotal) result = 'You Win!';
       else if (dealerTotal > playerTotal) result = 'Dealer Wins!';
-      else result = 'It's a Tie!';
+      else result = 'It\'s a Tie!';
       document.getElementById('result').textContent = result;
     }
 
@@ -151,7 +156,12 @@
       document.getElementById('result').textContent = '';
     }
 
+    document.getElementById('hit-btn').addEventListener('click', hit);
+    document.getElementById('stand-btn').addEventListener('click', stand);
+    document.getElementById('reset-btn').addEventListener('click', resetGame);
+
     resetGame();
   </script>
 </body>
 </html>
+
